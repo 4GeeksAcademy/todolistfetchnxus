@@ -3,14 +3,14 @@ import React, { useState, useEffect } from "react";
 // Incluye imágenes en tu bundle
 import rigoImage from "../../img/rigo-baby.jpg";
 
-const API_URL = 'https://playground.4geeks.com/todo/user/alesanchezr';
+const API_URL = 'https://playground.4geeks.com/todo/users/juandiaz';
 
 const Home = () => {
     const [inputValue, setInputValue] = useState("");
     const [todos, setTodos] = useState([]);
 
     useEffect(() => {
-        
+        // Fetch tasks from the API when the component mounts
         fetch(API_URL)
             .then(response => {
                 if (!response.ok) {
@@ -19,7 +19,6 @@ const Home = () => {
                 return response.json();
             })
             .then(data => {
-                
                 if (Array.isArray(data)) {
                     setTodos(data);
                 } else {
@@ -27,7 +26,7 @@ const Home = () => {
                 }
             })
             .catch(error => console.error('Error fetching tasks:', error));
-    }, []);
+    }, []); // Empty dependency array means this effect runs once on mount
 
     const updateTasksOnServer = (tasks) => {
         fetch(API_URL, {
@@ -48,7 +47,8 @@ const Home = () => {
     };
 
     const addTask = () => {
-        const newTasks = todos.concat([inputValue]);
+        if (inputValue.trim() === "") return; // Prevent adding empty tasks
+        const newTasks = [...todos, inputValue.trim()];
         setTodos(newTasks);
         updateTasksOnServer(newTasks);
         setInputValue("");
@@ -71,7 +71,7 @@ const Home = () => {
             return response.json();
         })
         .then(() => {
-            setTodos([]);
+            setTodos([]); // Clear tasks from the front-end
             console.log('All tasks deleted from server');
         })
         .catch(error => console.error('Error deleting all tasks:', error));
@@ -87,14 +87,14 @@ const Home = () => {
                         onChange={(e) => setInputValue(e.target.value)}
                         value={inputValue}
                         onKeyPress={(e) => {
-                            if (e.key === "Enter" && inputValue) {
+                            if (e.key === "Enter") {
                                 addTask();
                             }
                         }}
                         placeholder="What do you need to do?"
                     />
                 </li>
-                {Array.isArray(todos) && todos.map((item, index) => (
+                {todos.map((item, index) => (
                     <li key={index}>
                         {item} 
                         <i 
